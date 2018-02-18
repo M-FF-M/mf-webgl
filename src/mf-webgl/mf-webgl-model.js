@@ -10,6 +10,38 @@ import {
  */
 class MFWebGLModel {
   /**
+   * Convert a JavaScript array to a WebGL buffer (Uint16Array)
+   * @param {WebGLRenderingContext} gl - the rendering context
+   * @param {Array} array - the JavaScript array
+   * @param {number} drawVar - e.g. gl.STATIC_DRAW
+   * @return {WebGLBuffer} the WebGL buffer
+   */
+  static toGLBuffer_Uint16(gl, array, drawVar) {
+    const numItems = array.length;
+    const itemSize = array[0].length;
+    const bufferArr = [];
+    for (let i=0; i<numItems; i++)
+      for (let k=0; k<itemSize; k++)
+        bufferArr.push(array[i][k]);
+    const glBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, glBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(bufferArr), drawVar);
+    glBuffer.itemSize = 1;
+    glBuffer.numItems = numItems * itemSize;
+    return glBuffer;
+  }
+
+  /**
+   * Convert a JavaScript array to a WebGL buffer (Uint16Array, gl.STATIC_DRAW)
+   * @param {WebGLRenderingContext} gl - the rendering context
+   * @param {Array} array - the JavaScript array
+   * @return {WebGLBuffer} the WebGL buffer
+   */
+  static toGLBuffer_Uint16_STATIC_DRAW(gl, array) {
+    return MFWebGLModel.toGLBuffer_Uint16(gl, array, gl.STATIC_DRAW);
+  }
+
+  /**
    * Convert a JavaScript array to a WebGL buffer (Float32Array)
    * @param {WebGLRenderingContext} gl - the rendering context
    * @param {Array} array - the JavaScript array

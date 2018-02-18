@@ -52,16 +52,23 @@ class MFWebGLVMaterial extends MFWebGLMaterial {
    * @param {Array} colors - an array with the vertex colors
    * @param {number} triangleType - the triangle type, e.g. gl.TRIANGLES or gl.TRIANGLE_STRIP
    * @param {MFWebGLVMaterial} material - optional: the MFWebGLVMaterial object to use
+   * @param {Array} triangleVertices - optional: an array specifying which vertices should
+   * form triangles. This array should contain arrays of size 3 containing the vertex indices
    * @return {MFWebGLObject} the corresponding MFWebGLObject
    */
-  static getObject(gl, vertices, colors, triangleType, material = null) {
+  static getObject(gl, vertices, colors, triangleType, material = null, triangleVertices = null) {
     if (material === null)
       material = new MFWebGLVMaterial(gl);
 
     const matInfo = {
       vertexColorBuffer: MFWebGLModel.toGLBuffer_Float32_STATIC_DRAW(gl, colors),
-      triangleType
+      triangleType,
+      drawInOrder: true
     };
+    if (triangleVertices !== null) {
+      matInfo.drawInOrder = false;
+      matInfo.vertexIndexBuffer = MFWebGLModel.toGLBuffer_Uint16_STATIC_DRAW(gl, triangleVertices);
+    }
     const model = new MFWebGLModel(gl, vertices, matInfo);
     return new MFWebGLObject(model, material);
   }
@@ -97,9 +104,19 @@ class MFWebGLVMaterial extends MFWebGLMaterial {
     gl.bindBuffer(gl.ARRAY_BUFFER, attr.vertexColorBuffer);
     gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, attr.vertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
-    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
-    gl.drawArrays(attr.triangleType, 0, model.vertexPositionBuffer.numItems);
+    if (attr.drawInOrder) {
+      gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+      gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+
+      gl.drawArrays(attr.triangleType, 0, model.vertexPositionBuffer.numItems);
+    } else {
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, attr.vertexIndexBuffer);
+
+      gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+      gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+
+      gl.drawElements(gl.TRIANGLES, attr.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+    }
 
     return [mvMatrix, pMatrix];
   }

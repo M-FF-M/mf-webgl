@@ -184,7 +184,7 @@ class MFWebGL {
     gl.viewportWidth = this.canvas.width;
     gl.viewportHeight = this.canvas.height;
 
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clearColor(0.0, 0.0, 0.0, 0.0);
     gl.enable(gl.DEPTH_TEST);
 
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
