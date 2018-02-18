@@ -1,3 +1,6 @@
+/**
+ * Represents a WebGL object (consisting of a model and a material)
+ */
 class MFWebGLObject {
   /**
    * Create a new MFWebGLObject
@@ -24,6 +27,15 @@ class MFWebGLObject {
    */
   set position(position) {
     this.model.position = position;
+  }
+  
+  /**
+   * Render this object
+   * @param {mat4} mvMatrix - the model view matrix
+   * @param {mat4} pMatrix - the projection matrix
+   */
+  render(mvMatrix, pMatrix) {
+    this.material.render(this.model, mvMatrix, pMatrix);
   }
 }
 

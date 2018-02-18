@@ -1,3 +1,6 @@
+/**
+ * Represents a scene containing WebGL objects
+ */
 class MFWebGLScene {
   /**
    * Create a new MFWebGLScene
@@ -24,7 +27,7 @@ class MFWebGLScene {
    */
   render(mvMatrix, pMatrix) {
     for (let i=0; i<this.objects.length; i++)
-      this.objects[i].material.render(this.objects[i].model, mvMatrix, pMatrix);
+      this.objects[i].render(mvMatrix, pMatrix);
   }
 }
 

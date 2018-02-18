@@ -1,3 +1,6 @@
+/**
+ * Represents a (surface) material for a WebGL object
+ */
 class MFWebGLMaterial {
   /**
    * Create a new MFWebGLMaterial

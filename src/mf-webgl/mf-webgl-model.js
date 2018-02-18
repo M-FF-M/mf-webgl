@@ -5,6 +5,9 @@ import {
   vec2, vec3, vec4,
 } from '../gl-matrix.js';
 
+/**
+ * Represents a 3D WebGL model
+ */
 class MFWebGLModel {
   /**
    * Convert a JavaScript array to a WebGL buffer (Float32Array)

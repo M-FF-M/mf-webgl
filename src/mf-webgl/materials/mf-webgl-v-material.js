@@ -1,7 +1,7 @@
-import { createShaderProgram } from './mf-webgl-utils.js';
-import { MFWebGLMaterial } from './mf-webgl-material.js';
-import { MFWebGLModel } from './mf-webgl-model.js';
-import { MFWebGLObject } from './mf-webgl-object.js';
+import { createShaderProgram } from '../mf-webgl-utils.js';
+import { MFWebGLMaterial } from '../mf-webgl-material.js';
+import { MFWebGLModel } from '../mf-webgl-model.js';
+import { MFWebGLObject } from '../mf-webgl-object.js';
 
 const vertexShaderSource = `
   attribute vec3 aVertexPosition;
@@ -41,19 +41,22 @@ function initShaders(gl, shaders = [ [vertexShaderSource, 'x-shader/x-vertex'],
   return shaderProgram;
 }
 
-class MFWebGLTutMaterial extends MFWebGLMaterial {
+/**
+ * This material assigns vertex colors (that will be interpolated for each triangle)
+ */
+class MFWebGLVMaterial extends MFWebGLMaterial {
   /**
    * Creates a MFWebGLObject with the given vertices and colors using this material
    * @param {WebGLRenderingContext} gl - the rendering context
    * @param {Array} vertices - an array with the vertices
    * @param {Array} colors - an array with the vertex colors
    * @param {number} triangleType - the triangle type, e.g. gl.TRIANGLES or gl.TRIANGLE_STRIP
-   * @param {MFWebGLTutMaterial} material - optional: the MFWebGLTutMaterial object to use
+   * @param {MFWebGLVMaterial} material - optional: the MFWebGLVMaterial object to use
    * @return {MFWebGLObject} the corresponding MFWebGLObject
    */
   static getObject(gl, vertices, colors, triangleType, material = null) {
     if (material === null)
-      material = new MFWebGLTutMaterial(gl);
+      material = new MFWebGLVMaterial(gl);
 
     const matInfo = {
       vertexColorBuffer: MFWebGLModel.toGLBuffer_Float32_STATIC_DRAW(gl, colors),
@@ -64,7 +67,7 @@ class MFWebGLTutMaterial extends MFWebGLMaterial {
   }
 
   /**
-   * Create a new MFWebGLTutMaterial
+   * Create a new MFWebGLVMaterial
    * @param {WebGLRenderingContext} gl - the rendering context
    */
   constructor(gl) {
@@ -102,4 +105,4 @@ class MFWebGLTutMaterial extends MFWebGLMaterial {
   }
 }
 
-export { vertexShaderSource, fragmentShaderSource, initShaders, MFWebGLTutMaterial };
+export { vertexShaderSource, fragmentShaderSource, initShaders, MFWebGLVMaterial };

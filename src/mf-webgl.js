@@ -5,11 +5,6 @@ import {
   vec2, vec3, vec4,
 } from './gl-matrix.js';
 
-import { MFWebGLObject } from './mf-webgl/mf-webgl-object.js';
-import { MFWebGLTutMaterial } from './mf-webgl/mf-webgl-tut-material.js';
-import { MFWebGLModel } from './mf-webgl/mf-webgl-model.js';
-import { MFWebGLScene } from './mf-webgl/mf-webgl-scene.js';
-
 /**
  * A class for making using WegGL easier
  */
@@ -60,8 +55,8 @@ class MFWebGL {
     this.render = this.render.bind(this);
     this.resize = this.resize.bind(this);
     this.renderLoop = false;
-    /**/ this.triangleRot = 0;
-    this.lastTime = (new Date()).getTime();
+    this.startTime = (new Date()).getTime();
+    this.lastTime = this.startTime;
     this.mode = mode;
     const fl_b = this.mode & 0b11110000;
     this.canvas = document.createElement('canvas');
@@ -77,8 +72,35 @@ class MFWebGL {
     } else if (fl_b == MFWebGL.ADDTOELEMENT && elem != null)
       elem.appendChild(this.canvas);
     this.gl = this.canvas.getContext("webgl");
-    this.init();
+    this.mvMatrix = mat4.create();
+    this.pMatrix = mat4.create();
+    this.renderListeners = [];
+    this.wasResized = true;
+    this.scene = null;
+    this.camera = null;
     this.constructing = false;
+  }
+
+  /**
+   * Add an event listener to this MFWebGL instance. The listeners will be called with
+   * the following parameters:
+   * - type 'render': (timeSinceStart, timeSinceLast) where timeSinceStart is the time in
+   *   milliseconds since the last resetTimer() call and timeSinceLast is the time in
+   *   milliseconds since the last frame (call to render())
+   * @param {string} type - the type of event the listener wants to listen to. The follwing
+   * parameters are possible: 'render'
+   * @param {Function} listener - the event listener
+   */
+  addEventListener(type, listener) {
+    if (type === 'render') this.renderListeners.push(listener);
+  }
+
+  /**
+   * Reset the internal timer
+   */
+  resetTimer() {
+    this.startTime = (new Date()).getTime();
+    this.lastTime = this.startTime;
   }
 
   /**
@@ -103,56 +125,9 @@ class MFWebGL {
       this.width = this.canvas.width = width;
       this.height = this.canvas.height = height;
     }
+    this.wasResized = true;
     if (!this.constructing)
       this.render(true);
-  }
-
-  /**
-   * Initialize all required attributes and variables
-   */
-  init() {
-    this.material = new MFWebGLTutMaterial(this.gl);
-
-    this.triangle = MFWebGLTutMaterial.getObject(
-        this.gl,
-        [
-            [  0.0,  1.0,  0.0 ],
-            [ -1.0, -1.0,  0.0 ],
-            [  1.0, -1.0,  0.0 ]
-        ],
-        [
-            [ 1.0, 0.0, 0.0, 1.0 ],
-            [ 0.0, 1.0, 0.0, 1.0 ],
-            [ 0.0, 0.0, 1.0, 1.0 ]
-        ],
-        this.gl.TRIANGLES,
-        this.material
-    );
-    this.triangle.position = [-1.5, 0.0, -7.0];
-
-    this.square = MFWebGLTutMaterial.getObject(
-        this.gl,
-        [
-            [  1.0,  1.0,  0.0 ],
-            [ -1.0,  1.0,  0.0 ],
-            [  1.0, -1.0,  0.0 ],
-            [ -1.0, -1.0,  0.0 ]
-        ],
-        [
-            [ 0.5, 0.5, 1.0, 1.0 ],
-            [ 0.5, 0.5, 1.0, 1.0 ],
-            [ 0.5, 0.5, 1.0, 1.0 ],
-            [ 0.5, 0.5, 1.0, 1.0 ]
-        ],
-        this.gl.TRIANGLE_STRIP,
-        this.material
-    );
-    this.square.position = [1.5, 0.0, -7.0];
-
-    this.scene = new MFWebGLScene([this.triangle, this.square]);
-
-    this.mvMatrix = mat4.create();
-    this.pMatrix = mat4.create();
   }
 
   /**
@@ -173,14 +148,16 @@ class MFWebGL {
   }
 
   /**
-   * Returns the time that passed since the last call to timePassed()
-   * @return {number} the time in milliseconds
+   * Returns the time that passed since the last call to timePassed() and since the last
+   * call to resetTimer()
+   * @return {Array} at index 0: the time in milliseconds since the last resetTimer() call,
+   * at index 1: the time in milliseconds since the last timePassed() call
    */
   timePassed() {
     const timeNow = (new Date()).getTime();
     const retTime = timeNow - this.lastTime;
     this.lastTime = timeNow;
-    return retTime;
+    return [timeNow - this.startTime, retTime];
   }
 
   /**
@@ -193,9 +170,16 @@ class MFWebGL {
       requestAnimationFrame(this.render);
 
     const time = this.timePassed();
+    for (let i=0; i<this.renderListeners.length; i++)
+      this.renderListeners[i](time[0], time[1]);
 
-    const gl = this.gl, pMatrix = this.pMatrix, mvMatrix = this.mvMatrix,
-        triangle = this.triangle;
+    if (this.scene === null || this.camera === null) {
+      console.warn('Unable to render as no scene or no camera was specified!');
+      return;
+    }
+
+    const gl = this.gl;
+    let pMatrix = this.pMatrix, mvMatrix = this.mvMatrix;
 
     gl.viewportWidth = this.canvas.width;
     gl.viewportHeight = this.canvas.height;
@@ -206,14 +190,12 @@ class MFWebGL {
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
-    mat4.identity(mvMatrix);
-
-    triangle.rotate = [MFWebGL.degToRad(this.triangleRot), [0, 1, 0]];
+    if (this.wasResized)
+      this.pMatrix = pMatrix = this.camera.pMatrix(gl.viewportWidth, gl.viewportHeight);
+    this.mvMatrix = mvMatrix = this.camera.mvMatrix();
 
     this.scene.render(mvMatrix, pMatrix);
-
-    this.triangleRot += 360 * time / 1000.0;
+    this.wasResized = false;
   }
 }
 
