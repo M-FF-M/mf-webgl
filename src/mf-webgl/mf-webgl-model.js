@@ -3,7 +3,7 @@ import {
   mat2, mat2d, mat3, mat4,
   quat,
   vec2, vec3, vec4,
-} from './gl-matrix.js';
+} from '../gl-matrix.js';
 
 class MFWebGLModel {
   /**

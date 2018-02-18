@@ -5,10 +5,10 @@ import {
   vec2, vec3, vec4,
 } from './gl-matrix.js';
 
-import { MFWebGLObject } from './mf-webgl-object.js';
-import { MFWebGLTutMaterial } from './mf-webgl-tut-material.js';
-import { MFWebGLModel } from './mf-webgl-model.js';
-import { MFWebGLScene } from './mf-webgl-scene.js';
+import { MFWebGLObject } from './mf-webgl/mf-webgl-object.js';
+import { MFWebGLTutMaterial } from './mf-webgl/mf-webgl-tut-material.js';
+import { MFWebGLModel } from './mf-webgl/mf-webgl-model.js';
+import { MFWebGLScene } from './mf-webgl/mf-webgl-scene.js';
 
 /**
  * A class for making using WegGL easier
