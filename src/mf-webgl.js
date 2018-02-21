@@ -54,6 +54,18 @@ class MFWebGL {
     this.constructing = true;
     this.render = this.render.bind(this);
     this.resize = this.resize.bind(this);
+    this.windowResize = this.windowResize.bind(this);
+    this.keyDown = this.keyDown.bind(this);
+    this.keyPress = this.keyPress.bind(this);
+    this.keyUp = this.keyUp.bind(this);
+    this.autoResizing = false;
+    this.autoCameraMove = false;
+    this.cameraMoveDelta = 0.1;
+    this.cameraRotateDelta = 0.02;
+    window.addEventListener('resize', () => this.windowResize());
+    window.addEventListener('keydown', (e) => this.keyDown(e));
+    window.addEventListener('keypress', (e) => this.keyPress(e));
+    window.addEventListener('keyup', (e) => this.keyUp(e));
     this.renderLoop = false;
     this.startTime = (new Date()).getTime();
     this.lastTime = this.startTime;
@@ -104,6 +116,80 @@ class MFWebGL {
   }
 
   /**
+   * This method will be called when a key is pressed
+   * @param {KeyboardEvent} ev - the corresponding event
+   */
+  keyDown(ev) {
+    let posChanged = false;
+    if (this.autoCameraMove) {
+      if (ev.key.toLowerCase() === 'q') {
+        this.camera.moveUp(this.cameraMoveDelta);
+        posChanged = true;
+      } else if (ev.key.toLowerCase() === 'e') {
+        this.camera.moveDown(this.cameraMoveDelta);
+        posChanged = true;
+      } else if (ev.key.toLowerCase() === 'a') {
+        this.camera.moveLeft(this.cameraMoveDelta);
+        posChanged = true;
+      } else if (ev.key.toLowerCase() === 'd') {
+        this.camera.moveRight(this.cameraMoveDelta);
+        posChanged = true;
+      } else if (ev.key.toLowerCase() === 'w') {
+        this.camera.moveForward(this.cameraMoveDelta);
+        posChanged = true;
+      } else if (ev.key.toLowerCase() === 's') {
+        this.camera.moveBack(this.cameraMoveDelta);
+        posChanged = true;
+      } else if (ev.key.toLowerCase() === 'arrowleft') {
+        this.camera.lookLeft(this.cameraRotateDelta);
+        posChanged = true;
+      } else if (ev.key.toLowerCase() === 'arrowright') {
+        this.camera.lookRight(this.cameraRotateDelta);
+        posChanged = true;
+      } else if (ev.key.toLowerCase() === 'arrowup') {
+        this.camera.lookUp(this.cameraRotateDelta);
+        posChanged = true;
+      } else if (ev.key.toLowerCase() === 'arrowdown') {
+        this.camera.lookDown(this.cameraRotateDelta);
+        posChanged = true;
+      } else if (ev.key.toLowerCase() === 'n') {
+        this.camera.tiltLeft(this.cameraRotateDelta);
+        posChanged = true;
+      } else if (ev.key.toLowerCase() === 'm') {
+        this.camera.tiltRight(this.cameraRotateDelta);
+        posChanged = true;
+      }
+    }
+    if (!this.constructing && posChanged)
+      this.render(0, true);
+  }
+
+  /**
+   * This method will be called when a key is pressed
+   * @param {KeyboardEvent} ev - the corresponding event
+   */
+  keyPress(ev) {
+
+  }
+
+  /**
+   * This method will be called when a key is pressed
+   * @param {KeyboardEvent} ev - the corresponding event
+   */
+  keyUp(ev) {
+
+  }
+
+  /**
+   * This method will be called when the window is resized
+   */
+  windowResize() {
+    const fl_a = this.mode & 0b1111;
+    if (fl_a == MFWebGL.FULLSCREEN && this.autoResizing)
+      this.resize();
+  }
+
+  /**
    * Resize the canvas
    * @param {number} width - the new width of the canvas. This parameter has no effect if this
    * MFWebGL instance uses FULLSCREEN or FIXEDSIZE mode
@@ -127,7 +213,7 @@ class MFWebGL {
     }
     this.wasResized = true;
     if (!this.constructing)
-      this.render(true);
+      this.render(0, true);
   }
 
   /**

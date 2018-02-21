@@ -7,6 +7,8 @@ class MFWebGLTutorial {
     this.renderCallback = this.renderCallback.bind(this);
 
     this.webgl = new MFWebGL();
+    this.webgl.autoResizing = true;
+    this.webgl.autoCameraMove = true;
 
     const gl = this.webgl.gl;
     this.materialv = new MFWebGLVMaterial(gl);
@@ -136,7 +138,7 @@ class MFWebGLTutorial {
             [ 0.0, 1.0 ]
         ],
         gl.TRIANGLE_STRIP,
-        new MFWebGLTexture(gl, 'texture.png'),
+        new MFWebGLTexture(gl, 'texture.png', MFWebGLTexture.LINEAR_MIPMAP),
         this.materialt,
         [
             [0, 1, 2],      [0, 2, 3],    // Front face
@@ -152,8 +154,7 @@ class MFWebGLTutorial {
     this.webgl.scene = new MFWebGLScene([this.triangle, this.cube]);
     this.camera = new MFWebGLCamera(/*MFWebGLCamera.ORTHOGRAPHIC, 6*/);
     this.webgl.camera = this.camera;
-    this.webgl.camera.position = [-3.0, 2.0, 0.0];
-    this.webgl.camera.lookAt = [0.0, 0.0, -7.0];
+    this.webgl.camera.setLookFromTo([-3.0, 2.0, 0.0], [0.0, 0.0, -7.0]);
     this.webgl.addEventListener('render', this.renderCallback);
 
     this.webgl.render();
