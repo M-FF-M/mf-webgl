@@ -154,7 +154,8 @@ class MFWebGLTutorial {
     this.webgl.scene = new MFWebGLScene([this.triangle, this.cube]);
     this.camera = new MFWebGLCamera(/*MFWebGLCamera.ORTHOGRAPHIC, 6*/);
     this.webgl.camera = this.camera;
-    this.webgl.camera.setLookFromTo([-3.0, 2.0, 0.0], [0.0, 0.0, -7.0]);
+    this.webgl.camera.setLookFromTo([-3.0, 0.0, 0.0], [0.0, 0.0, -7.0]);
+    //this.webgl.camera.setRotationMode(MFWebGLCamera.FREE_ROTATION);
     this.webgl.addEventListener('render', this.renderCallback);
 
     this.webgl.render();
