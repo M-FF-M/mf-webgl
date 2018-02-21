@@ -28,7 +28,7 @@ class MFWebGLObject {
   set position(position) {
     this.model.position = position;
   }
-  
+
   /**
    * Render this object
    * @param {mat4} mvMatrix - the model view matrix

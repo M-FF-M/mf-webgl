@@ -1,4 +1,6 @@
-import { MFWebGL, MFWebGLScene, MFWebGLCamera, MFWebGLVMaterial } from './src/index.js';
+import {
+  MFWebGL, MFWebGLScene, MFWebGLCamera, MFWebGLVMaterial, MFWebGLTMaterial, MFWebGLTexture
+} from './src/index.js';
 
 class MFWebGLTutorial {
   constructor() {
@@ -7,7 +9,8 @@ class MFWebGLTutorial {
     this.webgl = new MFWebGL();
 
     const gl = this.webgl.gl;
-    this.material = new MFWebGLVMaterial(gl);
+    this.materialv = new MFWebGLVMaterial(gl);
+    this.materialt = new MFWebGLTMaterial(gl);
 
     this.triangle = MFWebGLVMaterial.getObject(
         gl,
@@ -22,11 +25,11 @@ class MFWebGLTutorial {
             [ 0.0, 0.0, 1.0, 1.0 ]
         ],
         gl.TRIANGLES,
-        this.material
+        this.materialv
     );
     this.triangle.position = [-1.5, 0.0, -7.0];
 
-    this.cube = MFWebGLVMaterial.getObject(
+    this.cube = MFWebGLTMaterial.getObject(
         gl,
         [
             // Front face
@@ -66,7 +69,7 @@ class MFWebGLTutorial {
             [ -1.0,  1.0, -1.0 ]
         ],
         [
-            [1.0, 0.0, 0.0, 1.0], // Front face
+            /*[1.0, 0.0, 0.0, 1.0], // Front face
             [1.0, 0.0, 0.0, 1.0], // Front face
             [1.0, 0.0, 0.0, 1.0], // Front face
             [1.0, 0.0, 0.0, 1.0], // Front face
@@ -94,10 +97,47 @@ class MFWebGLTutorial {
             [0.0, 0.0, 1.0, 1.0], // Left face
             [0.0, 0.0, 1.0, 1.0], // Left face
             [0.0, 0.0, 1.0, 1.0], // Left face
-            [0.0, 0.0, 1.0, 1.0]  // Left face
+            [0.0, 0.0, 1.0, 1.0]  // Left face*/
+
+            // Front face
+            [ 0.0, 0.0 ],
+            [ 1.0, 0.0 ],
+            [ 1.0, 1.0 ],
+            [ 0.0, 1.0 ],
+
+            // Back face
+            [ 1.0, 0.0 ],
+            [ 1.0, 1.0 ],
+            [ 0.0, 1.0 ],
+            [ 0.0, 0.0 ],
+
+            // Top face
+            [ 0.0, 1.0 ],
+            [ 0.0, 0.0 ],
+            [ 1.0, 0.0 ],
+            [ 1.0, 1.0 ],
+
+            // Bottom face
+            [ 1.0, 1.0 ],
+            [ 0.0, 1.0 ],
+            [ 0.0, 0.0 ],
+            [ 1.0, 0.0 ],
+
+            // Right face
+            [ 1.0, 0.0 ],
+            [ 1.0, 1.0 ],
+            [ 0.0, 1.0 ],
+            [ 0.0, 0.0 ],
+
+            // Left face
+            [ 0.0, 0.0 ],
+            [ 1.0, 0.0 ],
+            [ 1.0, 1.0 ],
+            [ 0.0, 1.0 ]
         ],
         gl.TRIANGLE_STRIP,
-        this.material,
+        new MFWebGLTexture(gl, 'texture.png'),
+        this.materialt,
         [
             [0, 1, 2],      [0, 2, 3],    // Front face
             [4, 5, 6],      [4, 6, 7],    // Back face
@@ -117,6 +157,7 @@ class MFWebGLTutorial {
     this.webgl.addEventListener('render', this.renderCallback);
 
     this.webgl.render();
+    window.setTimeout(() => this.webgl.render(), 1000);
   }
 
   renderCallback(timeSinceStart, timeSinceLast) {
