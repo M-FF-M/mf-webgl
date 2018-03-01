@@ -1,14 +1,16 @@
 import {
-  MFWebGL, MFWebGLScene, MFWebGLCamera, MFWebGLVMaterial, MFWebGLTMaterial, MFWebGLTexture
+  MFWebGL, MFWebGLScene, MFWebGLCamera, MFWebGLVMaterial, MFWebGLTMaterial, MFWebGLTexture,
+  MFWebGLTextureLoader
 } from './src/index.js';
 
 class MFWebGLTutorial {
   constructor() {
     this.renderCallback = this.renderCallback.bind(this);
+    this.loadCallback = this.loadCallback.bind(this);
+    this.textureLoader = new MFWebGLTextureLoader();
+    this.textureLoader.addEventListener('load', this.loadCallback);
 
     this.webgl = new MFWebGL();
-    this.webgl.autoResizing = true;
-    this.webgl.autoCameraMove = true;
 
     const gl = this.webgl.gl;
     this.materialv = new MFWebGLVMaterial(gl);
@@ -149,17 +151,24 @@ class MFWebGLTutorial {
             [20, 21, 22],   [20, 22, 23]  // Left face
         ]
     );
+    this.textureLoader.addTexture('texture.png');
     this.cube.position = [1.5, 0.0, -7.0];
 
     this.webgl.scene = new MFWebGLScene([this.triangle, this.cube]);
     this.camera = new MFWebGLCamera(/*MFWebGLCamera.ORTHOGRAPHIC, 6*/);
     this.webgl.camera = this.camera;
-    this.webgl.camera.setLookFromTo([-3.0, 0.0, 0.0], [0.0, 0.0, -7.0]);
+    this.webgl.camera.setLookFromTo([-3.0, 2.0, 0.0], [0.0, 0.0, -7.0]);
     //this.webgl.camera.setRotationMode(MFWebGLCamera.FREE_ROTATION);
     this.webgl.addEventListener('render', this.renderCallback);
 
+    this.textureLoader.start();
+  }
+
+  loadCallback() {
+    this.webgl.autoResizing = true;
+    this.webgl.autoCameraMove = true;
+
     this.webgl.render();
-    window.setTimeout(() => this.webgl.render(), 1000);
   }
 
   renderCallback(timeSinceStart, timeSinceLast) {

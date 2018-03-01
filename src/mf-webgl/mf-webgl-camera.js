@@ -16,10 +16,6 @@ class MFWebGLCamera {
   /**
    * Flag for setting the built-in rotation mode to 2-angle rotation - meaning looking
    * to the left and right manipulates one angle and looking up and down the other one.
-   * IMPORTANT: Currently, this mode is only properly supported if the camera position
-   * and the position the camera is looking at are at the same level (same y coordinate)
-   * (initially, then the position the camera is looking at can be changed by calling
-   * lookDown() or lookUp())
    */
   static get TWO_ANGLE_ROTATION() { return 0; }
   /**
@@ -47,12 +43,9 @@ class MFWebGLCamera {
     this.lookAt = [0, 0, -1];
     this.tilt = [0, 1, 0];
     this.dir = [0, 0, -1];
-    this.angleX = 0.0;
-    this.angleY = 0.0;
-    this.angleXRotation = mat4.create();
-    this.angleYRotation = mat4.create();
     this.cameraRotation = mat4.create();
     this.lookMatrix = mat4.create();
+    this.updateLookingAngles();
     mat4.lookAt(this.lookMatrix, this.position, this.lookAt, this.tilt);
   }
 
@@ -88,8 +81,14 @@ class MFWebGLCamera {
    * @param {number} mode - one of TWO_ANGLE_ROTATION, FREE_ROTATION
    */
   setRotationMode(mode) {
+    let oldMode = this.rotationMode;
     this.rotationMode = mode;
-    this.resetRotMatrices();
+    if (oldMode !== mode) {
+      if (mode === MFWebGLCamera.TWO_ANGLE_ROTATION)
+        this.updateLookingAngles();
+      else
+        this.resetRotMatrices();
+    }
   }
 
   /**
@@ -104,6 +103,24 @@ class MFWebGLCamera {
   }
 
   /**
+   * Used internally to adapt the looking angles to the camera and look at position
+   */
+  updateLookingAngles() {
+    this.resetRotMatrices();
+    if (this.rotationMode === MFWebGLCamera.TWO_ANGLE_ROTATION) {
+      if (this.lookAt[1] != this.position[1]) {
+        let cdir = vec3.create();
+        vec3.sub(cdir, this.lookAt, this.position);
+        let angle = Math.abs(vec3.angle(cdir, [0, 1, 0])) - Math.PI/2;
+        this.lookAt[1] = this.position[1];
+        this.angleX = angle;
+        mat4.rotateX(this.angleXRotation, mat4.create(), this.angleX);
+        mat4.mul(this.cameraRotation, this.angleXRotation, this.angleYRotation);
+      }
+    }
+  }
+
+  /**
    * Set the way the camera is looking
    * @param {vec3} from - the camera position
    * @param {vec3} to - the position the camera is looking at
@@ -113,12 +130,12 @@ class MFWebGLCamera {
     this.position = [from[0], from[1], from[2]];
     this.lookAt = [to[0], to[1], to[2]];
     this.tilt = [tilt[0], tilt[1], tilt[2]];
+    this.updateLookingAngles();
     const ab = vec3.create();
     vec3.sub(this.dir, this.lookAt, this.position);
     vec3.cross(ab, this.tilt, this.dir);
     vec3.cross(this.tilt, this.dir, ab);
     mat4.lookAt(this.lookMatrix, this.position, this.lookAt, this.tilt);
-    this.resetRotMatrices();
   }
 
   /**
@@ -129,12 +146,12 @@ class MFWebGLCamera {
   setLookFromTo(from, to) {
     this.position = [from[0], from[1], from[2]];
     this.lookAt = [to[0], to[1], to[2]];
+    this.updateLookingAngles();
     const ab = vec3.create();
     vec3.sub(this.dir, this.lookAt, this.position);
     vec3.cross(ab, this.tilt, this.dir);
     vec3.cross(this.tilt, this.dir, ab);
     mat4.lookAt(this.lookMatrix, this.position, this.lookAt, this.tilt);
-    this.resetRotMatrices();
   }
 
   /**
@@ -145,12 +162,12 @@ class MFWebGLCamera {
    */
   setPosition(x, y, z) {
     this.position = [x, y, z];
+    this.updateLookingAngles();
     const ab = vec3.create();
     vec3.sub(this.dir, this.lookAt, this.position);
     vec3.cross(ab, this.tilt, this.dir);
     vec3.cross(this.tilt, this.dir, ab);
     mat4.lookAt(this.lookMatrix, this.position, this.lookAt, this.tilt);
-    this.resetRotMatrices();
   }
 
   /**
@@ -161,12 +178,12 @@ class MFWebGLCamera {
    */
   setLookAt(x, y, z) {
     this.lookAt = [x, y, z];
+    this.updateLookingAngles();
     const ab = vec3.create();
     vec3.sub(this.dir, this.lookAt, this.position);
     vec3.cross(ab, this.tilt, this.dir);
     vec3.cross(this.tilt, this.dir, ab);
     mat4.lookAt(this.lookMatrix, this.position, this.lookAt, this.tilt);
-    this.resetRotMatrices();
   }
 
   /**
@@ -177,12 +194,12 @@ class MFWebGLCamera {
    */
   setTilt(x, y, z) {
     this.tilt = [x, y, z];
+    this.updateLookingAngles();
     const ab = vec3.create();
     vec3.sub(this.dir, this.lookAt, this.position);
     vec3.cross(ab, this.tilt, this.dir);
     vec3.cross(this.tilt, this.dir, ab);
     mat4.lookAt(this.lookMatrix, this.position, this.lookAt, this.tilt);
-    this.resetRotMatrices();
   }
 
   /**
