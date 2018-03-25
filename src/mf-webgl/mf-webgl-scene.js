@@ -21,13 +21,22 @@ class MFWebGLScene {
   }
 
   /**
+   * Set the lighting of the scene
+   * @param {MFWebGLLighting} lighting - the lighting (the type of lighting must
+   * fit the materials that are used - see the respective material's documentation)
+   */
+  setLighting(lighting) {
+    this.light = lighting;
+  }
+
+  /**
    * Render the scene
    * @param {mat4} mvMatrix - the model view matrix
    * @param {mat4} pMatrix - the projection matrix
    */
   render(mvMatrix, pMatrix) {
     for (let i=0; i<this.objects.length; i++)
-      this.objects[i].render(mvMatrix, pMatrix);
+      this.objects[i].render(mvMatrix, pMatrix, this.light);
   }
 }
 

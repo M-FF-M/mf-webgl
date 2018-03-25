@@ -8,6 +8,8 @@ export { MFWebGLTexture } from './mf-webgl/mf-webgl-texture.js';
 export { MFWebGLTextureLoader } from './mf-webgl/mf-webgl-texture-loader.js';
 export { MFWebGLVMaterial } from './mf-webgl/materials/mf-webgl-v-material.js';
 export { MFWebGLTMaterial } from './mf-webgl/materials/mf-webgl-t-material.js';
+export { MFWebGLLighting } from './mf-webgl/mf-webgl-lighting.js';
+export { MFWebGLSimpleLighting } from './mf-webgl/lighting/mf-webgl-simple-lighting.js';
 export {
   glMatrix,
   mat2, mat2d, mat3, mat4,

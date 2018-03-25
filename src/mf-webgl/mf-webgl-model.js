@@ -77,13 +77,16 @@ class MFWebGLModel {
    * Create a new MFWebGLModel
    * @param {WebGLRenderingContext} gl - the rendering context
    * @param {Array} vertices - the vertices of the model
+   * @param {Array} normals - the vertex normals
    * @param {Object} materialAttributes - an object containig rendering information
    */
-  constructor(gl, vertices, materialAttributes) {
+  constructor(gl, vertices, normals, materialAttributes) {
     this.gl = gl;
     this.vertices = vertices;
+    this.normals = normals;
     this.materialAttributes = materialAttributes;
     this.vertexPositionBuffer = MFWebGLModel.toGLBuffer_Float32_STATIC_DRAW(this.gl, vertices);
+    this.vertexNormalBuffer = MFWebGLModel.toGLBuffer_Float32_STATIC_DRAW(this.gl, normals);
     this.rotation = [0, null];
     this.translation = null;
   }

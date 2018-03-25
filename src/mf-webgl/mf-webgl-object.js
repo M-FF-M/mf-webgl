@@ -33,9 +33,10 @@ class MFWebGLObject {
    * Render this object
    * @param {mat4} mvMatrix - the model view matrix
    * @param {mat4} pMatrix - the projection matrix
+   * @param {MFWebGLLighting} light - the lighting
    */
-  render(mvMatrix, pMatrix) {
-    this.material.render(this.model, mvMatrix, pMatrix);
+  render(mvMatrix, pMatrix, light) {
+    this.material.render(this.model, mvMatrix, pMatrix, light);
   }
 }
 
